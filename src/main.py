@@ -1,0 +1,238 @@
+import streamlit as st
+import pandas as pd
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+import plotly.express as px
+from nltk.corpus import stopwords
+import nltk
+from utils import *
+
+# Download stop words if not already available
+# nltk.download('stopwords')  # run only once
+stop_words = set(stopwords.words('french'))  # Add multiple languages if needed
+
+# set page layout
+# st.set_page_config(layout="wide")
+
+# App title
+st.title("Analyse statistique 1er semestre")
+
+# File upload
+uploaded_file = st.file_uploader("Upload an Excel or CSV file", type=["csv", "xlsx"])
+
+if uploaded_file:
+    # Load file
+    if uploaded_file.name.endswith('.csv'):
+        df_raw = pd.read_csv(uploaded_file)
+    else:
+        df_raw = pd.read_excel(uploaded_file)
+
+    # Apply the functions to the dataframe
+    df = clean_classe_column(df_raw)
+
+    # Reorder the columns to place 'Niveau' and 'College' after 'Classe de votre enfant'
+    cols = list(df.columns)
+    index = cols.index('Classe de votre enfant')
+
+    # Insert the new columns at the correct position
+    cols.insert(index + 1, cols.pop(cols.index('Niveau')))
+    cols.insert(index + 2, cols.pop(cols.index('College')))
+    df = df_raw[cols]
+
+    # Homogenize classes
+    parent_columns = [col for col in df.columns if col.startswith('En tant que parent,')]
+    df = clean_parent_columns(df, parent_columns)
+
+
+    '''Streamlit App'''
+
+    st.write("### Data Preview")
+    st.dataframe(df.head())
+
+    # Detect variable types
+    numerical_vars = df.select_dtypes(include=['number']).columns.tolist()
+    categorical_vars = df.select_dtypes(include=['object', 'category']).columns.tolist()
+    free_text_vars = detect_free_text(df)
+
+    # Exclude free text from categorical variables
+    categorical_vars = [col for col in categorical_vars if col not in free_text_vars]
+
+    st.write("### Detected Variables")
+    st.write("Numerical Variables:", numerical_vars)
+    st.write("Categorical Variables:", categorical_vars)
+    st.write("Free Text Variables:", free_text_vars)
+
+    # Step 1: Allow the user to select multiple target variables
+    st.write("### Select Target Variables")
+    target_variables = st.multiselect(
+        "Select target variables for grouping",
+        options=df.select_dtypes(include=['object', 'category']).columns.tolist(),
+        default=[],
+        help="These variables will be used for grouping and will not be available for analysis."
+    )
+
+    # Step 2: Automatically exclude target variables from analysis column selection
+    st.write("### Select Columns for Analysis")
+    analysis_columns = []
+    for col in df.columns:
+        is_target_var = col in target_variables
+        default_checked = not is_target_var and col not in free_text_vars
+        if st.checkbox(f"{col}", value=default_checked):
+            analysis_columns.append(col)
+
+    # Step 3: Dropdown to select the active target variable for plots
+    if target_variables:
+        target_var = st.selectbox(
+            "Switch target variable for plots",
+            target_variables,
+            help="Select the target variable to group the data."
+        )
+
+    # Step 4: Button to trigger statistics computation
+    if st.button("Run Statistics"):
+        if target_variables and analysis_columns:
+            # Overall Statistics
+            st.write("### Statistiques globales")
+            overall_stats = df[analysis_columns].describe(include='all').transpose()
+            st.dataframe(overall_stats)
+
+            # Grouped Statistics
+            st.write(f"### Statistiques groupées")
+            grouped_stats = df.groupby(target_var)[analysis_columns].describe()
+            grouped_stats.columns = ['_'.join(col).strip() for col in grouped_stats.columns.values]
+            st.dataframe(grouped_stats)
+
+            # Visualizations
+            # Define a custom color scale
+            custom_colors = {
+                "Absolument pas": "#d73027",  # Red tone for negative class
+                "Plutôt non": "#fc8d59",  # Lighter red
+                "Non": "#d73027",  # Lighter red (similar tone for general "Non")
+                "Peu satisfaisante": "#d73027",
+                "Plutôt difficile": "#d73027",
+                "Oui, plutôt": "#91bfdb",  # Light blue
+                "Oui": "#4575b4",  # Light blue (similar tone for general "Oui")
+                "Assez satisfaisante": "#91bfdb",
+                "Plutôt bien": "#91bfdb",
+                "Oui, tout à fait": "#4575b4",  # Blue tone for positive class
+                "Très satisfaisante": "#4575b4",
+                "Très bien": "#4575b4"
+            }
+
+            default_color = "#999999"  # Gray for unhandled categories
+
+            # Keep track of displayed free text columns
+            displayed_free_text_columns = set()
+
+            st.write("### Visualisations")
+            for i, var in enumerate(analysis_columns):
+                try:
+                    if var in categorical_vars:
+                        # st.write(f"Distribution of '{var}' by '{target_var}'")
+
+                        # Grouped data
+                        grouped_data = df.groupby(target_var)[var].value_counts(normalize=False).unstack().fillna(0)
+
+                        # Convert counts to percentages for plotting
+                        percentage_data = grouped_data.div(grouped_data.sum(axis=1), axis=0) * 100
+
+                        # Get unique categories for this variable
+                        unique_classes = grouped_data.columns.tolist()
+
+                        # Dynamically order categories (negative to positive where applicable)
+                        class_order = [cls for cls in custom_colors if cls in unique_classes] + \
+                                      [cls for cls in unique_classes if cls not in custom_colors]
+
+                        # Dynamically map colors for present classes
+                        dynamic_colors = {cls: custom_colors.get(cls, default_color) for cls in class_order}
+
+                        # Prepare data for Plotly
+                        plot_data = percentage_data.stack().reset_index()
+                        plot_data.columns = [target_var, var, "Percentage"]
+                        plot_data["Count"] = grouped_data.stack().values
+
+                        # Ensure the correct order of categories
+                        plot_data[var] = pd.Categorical(plot_data[var], categories=class_order, ordered=True)
+
+                        # Plot using Plotly
+                        fig = px.bar(
+                            plot_data,
+                            x=target_var,
+                            y="Percentage",
+                            color=var,
+                            text="Count",
+                            hover_data={"Count": True, "Percentage": True, target_var: False},
+                            barmode="stack",
+                            labels={"Percentage": "Percentage (%)", "Count": "Count"},
+                            color_discrete_map=dynamic_colors,
+                            category_orders={var: class_order},  # Enforce category order
+                        )
+
+                        # Format the plot title with line breaks
+                        formatted_title = format_title(f"{var}")
+
+                        # Update layout for better visuals
+                        fig.update_layout(
+                            title=formatted_title,
+                            xaxis_title=target_var,
+                            yaxis_title="Percentage (%)",
+                            legend_title="",
+                            legend=dict(x=1.05, y=1, orientation="v"),
+                        )
+                        # fig.update_traces(texttemplate="%{text:.1f}%", textposition="inside")  # To display values in bars
+                        fig.update_traces(texttemplate="%{text}", textposition="inside")
+
+                        # Display the plot in Streamlit
+                        st.plotly_chart(fig, use_container_width=True)
+
+                        # Check if the next column is a free text column
+                        if i + 1 < len(df.columns):
+                            next_col = df.columns[df.columns.get_loc(var) + 1]
+                            if next_col in free_text_vars:
+                                st.write(f"{next_col}")
+
+                                # Extract and display the free text table
+                                free_text_table = df[[target_var, next_col]].dropna().reset_index(drop=True)
+                                st.dataframe(free_text_table)
+
+                except ValueError as e:
+                    st.warning(f"Could not generate visualization for '{var}': {e}")
+
+            # Free Text Analysis with Word Cloud
+            if free_text_vars:
+                st.write("### Word Clouds")
+                for col in free_text_vars:
+                    st.write(f"#### {col}")
+
+                    # Combine all text in the column
+                    text_data = ' '.join(df[col].dropna().astype(str).tolist())
+
+                    # Remove stop words
+                    text_data = ' '.join(word for word in text_data.split() if word.lower() not in stop_words)
+
+                    # Generate word cloud
+                    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text_data)
+
+                    # Display the word cloud
+                    plt.figure(figsize=(10, 5))
+                    plt.imshow(wordcloud, interpolation='bilinear')
+                    plt.axis('off')
+                    st.pyplot(plt)
+
+            # # Free Text Word Cloud with N-Grams
+            # if free_text_vars:
+            #     st.write("### Word Cloud")
+            #     for col in free_text_vars:
+            #         st.write(f"#### {col}")
+            #
+            #         # Combine all text in the column
+            #         text_data = df[col].dropna().astype(str).tolist()
+            #
+            #         # Generate the word cloud
+            #         wordcloud = generate_ngram_wordcloud(text_data, n_range=(1, 3), stop_words=stop_words)
+            #
+            #         # Display the word cloud
+            #         plt.figure(figsize=(10, 5))
+            #         plt.imshow(wordcloud, interpolation='bilinear')
+            #         plt.axis('off')
+            #         st.pyplot(plt)

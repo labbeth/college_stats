@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from wordcloud import WordCloud
+# from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import plotly.express as px
 from nltk.corpus import stopwords
@@ -198,26 +198,26 @@ if uploaded_file:
                 except ValueError as e:
                     st.warning(f"Could not generate visualization for '{var}': {e}")
 
-            # Free Text Analysis with Word Cloud
-            if free_text_vars:
-                st.write("### Word Clouds")
-                for col in free_text_vars:
-                    st.write(f"#### {col}")
+            # # Free Text Analysis with Word Cloud
+            # if free_text_vars:
+            #     st.write("### Word Clouds")
+            #     for col in free_text_vars:
+            #         st.write(f"#### {col}")
 
-                    # Combine all text in the column
-                    text_data = ' '.join(df[col].dropna().astype(str).tolist())
+            #         # Combine all text in the column
+            #         text_data = ' '.join(df[col].dropna().astype(str).tolist())
 
-                    # Remove stop words
-                    text_data = ' '.join(word for word in text_data.split() if word.lower() not in stop_words)
+            #         # Remove stop words
+            #         text_data = ' '.join(word for word in text_data.split() if word.lower() not in stop_words)
 
-                    # Generate word cloud
-                    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text_data)
+            #         # Generate word cloud
+            #         wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text_data)
 
-                    # Display the word cloud
-                    plt.figure(figsize=(10, 5))
-                    plt.imshow(wordcloud, interpolation='bilinear')
-                    plt.axis('off')
-                    st.pyplot(plt)
+            #         # Display the word cloud
+            #         plt.figure(figsize=(10, 5))
+            #         plt.imshow(wordcloud, interpolation='bilinear')
+            #         plt.axis('off')
+            #         st.pyplot(plt)
 
             # # Free Text Word Cloud with N-Grams
             # if free_text_vars:

@@ -9,7 +9,7 @@ from utils import *
 
 # Download stop words if not already available
 # nltk.download('stopwords')  # run only once
-stop_words = set(stopwords.words('french'))  # Add multiple languages if needed
+# stop_words = set(stopwords.words('french'))  # Add multiple languages if needed
 
 # set page layout
 # st.set_page_config(layout="wide")

@@ -1,6 +1,6 @@
 from sklearn.feature_extraction.text import CountVectorizer
-from wordcloud import WordCloud
-from nltk.corpus import stopwords
+# from wordcloud import WordCloud
+# from nltk.corpus import stopwords
 
 # nltk.download('stopwords')  # run only once
 # stop_words = set(stopwords.words('french'))  # Add multiple languages if needed

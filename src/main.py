@@ -199,7 +199,7 @@ if uploaded_file:
                                 free_text_table = df[[target_var, next_col]].dropna().reset_index(drop=True)
                                 st.dataframe(free_text_table)
 
-                                 # Add a form for notes input
+                                # Add a form for notes input
                                 with st.form(key=f"form_{next_col}"):
                                     if next_col not in st.session_state.user_notes:
                                         st.session_state.user_notes[next_col] = ""  # Initialize note in session state
@@ -218,7 +218,7 @@ if uploaded_file:
 
                 except ValueError as e:
                     st.warning(f"Could not generate visualization for '{var}': {e}")
-
+                
             # Numerical variable
             st.write("### Variables Numériques")
             for num_var in numerical_vars:

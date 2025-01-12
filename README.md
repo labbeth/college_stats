@@ -1,7 +1,8 @@
-# Streamlit App: Data Analysis and Visualization with Free Text Word Cloud
+# Streamlit App: Data Analysis and Visualization
 
 This Streamlit app allows users to upload CSV or Excel files and generate insightful visualizations, including:
 - Bar plots for categorical variables.
+- Scatter plot for numerical variables.
 - Word clouds for free-text columns with support for n-grams (unigrams, bigrams, and trigrams).
 
 The app dynamically handles free-text columns, links them to related categorical plots, and ensures clear and interactive visualizations.

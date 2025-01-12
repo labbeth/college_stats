@@ -125,6 +125,10 @@ if uploaded_file:
             displayed_free_text_columns = set()
 
             st.write("### Visualisations")
+            # Initialize session state for user notes
+            if "user_notes" not in st.session_state:
+                st.session_state.user_notes = {}
+                
             for i, var in enumerate(analysis_columns):
                 try:
                     if var in categorical_vars:
@@ -195,8 +199,45 @@ if uploaded_file:
                                 free_text_table = df[[target_var, next_col]].dropna().reset_index(drop=True)
                                 st.dataframe(free_text_table)
 
+                                 # Add a form for notes input
+                                with st.form(key=f"form_{next_col}"):
+                                    if next_col not in st.session_state.user_notes:
+                                        st.session_state.user_notes[next_col] = ""  # Initialize note in session state
+
+                                    user_note = st.text_area(
+                                        f"Notes d'analyse :",
+                                        value=st.session_state.user_notes[next_col],
+                                        placeholder="Entrez vos observations et analyse ici..."
+                                    )
+
+                                    # Add a hidden submit button to satisfy Streamlit's form requirement
+                                    st.form_submit_button(label="Submit", disabled=True)
+
+                                    # Save the note to session state
+                                    st.session_state.user_notes[next_col] = user_note
+
                 except ValueError as e:
                     st.warning(f"Could not generate visualization for '{var}': {e}")
+
+            # Numerical variable
+            st.write("### Variables Numériques")
+            for num_var in numerical_vars:
+                st.write(f"#### Scatter Plot: {num_var} vs. {target_var}")
+                fig = px.scatter(
+                    df,
+                    x=target_var,
+                    y=num_var,
+                    color=target_var,
+                    labels={target_var: target_var, num_var: num_var},
+                    title=f"{num_var} vs. {target_var}",
+                    hover_data=df.columns,
+                )
+                fig.update_layout(
+                    xaxis_title=target_var,
+                    yaxis_title=num_var,
+                    legend_title=target_var,
+                )
+                st.plotly_chart(fig, use_container_width=True)
 
             # # Free Text Analysis with Word Cloud
             # if free_text_vars:

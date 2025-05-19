@@ -111,6 +111,7 @@ if uploaded_file:
                 "Plutôt non": "#fc8d59",  # Lighter red
                 "Non, assez peu": "#fc8d59",
                 "Assez mal": "#fc8d59",
+                "Non, plutôt pas": #fc8d59",
                 "Oui, un peu": "#fc8d59",
                 "Non": "#d73027",  # Lighter red (similar tone for general "Non")
                 "Non pas du tout": "#d73027",

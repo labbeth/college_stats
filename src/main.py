@@ -31,13 +31,13 @@ if uploaded_file:
     # df = clean_classe_column(df_raw)
 
     # Reorder the columns to place 'Niveau' and 'College' after 'Classe de votre enfant'
-    cols = list(df.columns)
-    index = cols.index('Classe de votre enfant')
+    # cols = list(df.columns)
+    # index = cols.index('Classe de votre enfant')
 
     # Insert the new columns at the correct position
-    cols.insert(index + 1, cols.pop(cols.index('Niveau')))
-    cols.insert(index + 2, cols.pop(cols.index('College')))
-    df = df_raw[cols]
+    # cols.insert(index + 1, cols.pop(cols.index('Niveau')))
+    # cols.insert(index + 2, cols.pop(cols.index('College')))
+    # df = df_raw[cols]
 
     # Homogenize classes
     # parent_columns = [col for col in df.columns if col.startswith('En tant que parent,')]

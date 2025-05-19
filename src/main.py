@@ -110,10 +110,13 @@ if uploaded_file:
                 "Absolument pas": "#d73027",  # Red tone for negative class
                 "Plutôt non": "#fc8d59",  # Lighter red
                 "Non": "#d73027",  # Lighter red (similar tone for general "Non")
+                "Non pas du tout": "#d73027",
                 "Peu satisfaisante": "#d73027",
                 "Plutôt difficile": "#d73027",
                 "Oui, plutôt": "#91bfdb",  # Light blue
+                "Plutôt oui": "#91bfdb",
                 "Oui": "#4575b4",  # Light blue (similar tone for general "Oui")
+                "Oui tout à fait": "#4575b4",
                 "Assez satisfaisante": "#91bfdb",
                 "Plutôt bien": "#91bfdb",
                 "Oui, tout à fait": "#4575b4",  # Blue tone for positive class

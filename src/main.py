@@ -124,7 +124,6 @@ if uploaded_file:
                 "Plutôt oui": "#91bfdb",
                 "Assez bien": "#91bfdb",
                 "Oui, partiellement": "#91bfdb",
-                "Oui, un peu": "#91bfdb",
                 "Non, pas vraiment": "#91bfdb",
                 "Oui": "#4575b4",  # Light blue (similar tone for general "Oui")
                 "Oui, beaucoup": "#4575b4",

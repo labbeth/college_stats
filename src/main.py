@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import re
 # from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import plotly.express as px
@@ -30,6 +31,8 @@ if uploaded_file:
     # Apply the functions to the dataframe
     # df = clean_classe_column(df_raw)
 
+    df = add_concatenated_column(df_raw, "Niveau", "Classe", "Niveau_Classe")
+
     # Reorder the columns to place 'Niveau' and 'College' after 'Classe de votre enfant'
     # cols = list(df.columns)
     # index = cols.index('Classe de votre enfant')
@@ -42,9 +45,8 @@ if uploaded_file:
     # Homogenize classes
     # parent_columns = [col for col in df.columns if col.startswith('En tant que parent,')]
     # df = clean_parent_columns(df, parent_columns)
-    
-    df = df_raw
 
+    df = df_raw
 
     '''Streamlit App'''
 
@@ -53,32 +55,48 @@ if uploaded_file:
 
     # Detect variable types
     numerical_vars = df.select_dtypes(include=['number']).columns.tolist()
+    datetime_vars = df.select_dtypes(include=["datetime", "datetime64[ns]"]).columns.tolist()
     categorical_vars = df.select_dtypes(include=['object', 'category']).columns.tolist()
     free_text_vars = detect_free_text(df)
+    ip_vars = []
+    email_vars = []
+
+    for col in df.select_dtypes(include=["object"]):
+        try:
+            sample = df[col].dropna().astype(str).iloc[0]
+            if re.match(r"^\d{1,3}(\.\d{1,3}){3}$", sample):
+                ip_vars.append(col)
+            elif re.match(r".+@.+\..+", sample):
+                email_vars.append(col)
+        except Exception:
+            continue
 
     # Exclude free text from categorical variables
     categorical_vars = [col for col in categorical_vars if col not in free_text_vars]
 
-    st.write("### Detected Variables")
-    st.write("Numerical Variables:", numerical_vars)
-    st.write("Categorical Variables:", categorical_vars)
-    st.write("Free Text Variables:", free_text_vars)
+    st.write("### Variables identifiées")
+    st.write("Variables numériques:", numerical_vars)
+    st.write("Variables catégorielles:", categorical_vars)
+    st.write("Variables texte libre:", free_text_vars)
 
     # Step 1: Allow the user to select multiple target variables
-    st.write("### Select Target Variables")
+    st.write("### Sélectionnez les variables cibles")
     target_variables = st.multiselect(
-        "Select target variables for grouping",
+        "Selectionnez les variables cibles sur lesquelles effectuer le groupement",
         options=df.select_dtypes(include=['object', 'category']).columns.tolist(),
         default=[],
         help="These variables will be used for grouping and will not be available for analysis."
     )
 
     # Step 2: Automatically exclude target variables from analysis column selection
-    st.write("### Select Columns for Analysis")
+    st.write("### Selectionnez les colonnes à analyser")
+
+    # Regroupement des colonnes à exclure
+    excluded_vars = set(target_variables + numerical_vars + datetime_vars + ip_vars + email_vars)
+
     analysis_columns = []
     for col in df.columns:
-        is_target_var = col in target_variables
-        default_checked = not is_target_var and col not in free_text_vars
+        default_checked = col not in excluded_vars
         if st.checkbox(f"{col}", value=default_checked):
             analysis_columns.append(col)
 
@@ -91,7 +109,7 @@ if uploaded_file:
         )
 
     # Step 4: Button to trigger statistics computation
-    if st.button("Run Statistics"):
+    if st.button("Lancer l'analyse"):
         if target_variables and analysis_columns:
             # Overall Statistics
             st.write("### Statistiques globales")
@@ -146,7 +164,7 @@ if uploaded_file:
             # Initialize session state for user notes
             if "user_notes" not in st.session_state:
                 st.session_state.user_notes = {}
-                
+
             for i, var in enumerate(analysis_columns):
                 try:
                     if var in categorical_vars:
@@ -208,8 +226,9 @@ if uploaded_file:
                         st.plotly_chart(fig, use_container_width=True)
 
                         # Check if the next column is a free text column
-                        if i + 1 < len(df.columns):
-                            next_col = df.columns[df.columns.get_loc(var) + 1]
+                        col_index = df.columns.get_loc(var)
+                        if col_index + 1 < len(df.columns):
+                            next_col = df.columns[col_index + 1]
                             if next_col in free_text_vars:
                                 st.write(f"{next_col}")
 
@@ -236,26 +255,26 @@ if uploaded_file:
 
                 except ValueError as e:
                     st.warning(f"Could not generate visualization for '{var}': {e}")
-                
-            # Numerical variable
-            st.write("### Variables Numériques")
-            for num_var in numerical_vars:
-                st.write(f"#### Scatter Plot: {num_var} vs. {target_var}")
-                fig = px.scatter(
-                    df,
-                    x=target_var,
-                    y=num_var,
-                    color=target_var,
-                    labels={target_var: target_var, num_var: num_var},
-                    title=f"{num_var} vs. {target_var}",
-                    hover_data=df.columns,
-                )
-                fig.update_layout(
-                    xaxis_title=target_var,
-                    yaxis_title=num_var,
-                    legend_title=target_var,
-                )
-                st.plotly_chart(fig, use_container_width=True)
+
+            # # Numerical variable
+            # st.write("### Variables Numériques")
+            # for num_var in numerical_vars:
+            #     st.write(f"#### Scatter Plot: {num_var} vs. {target_var}")
+            #     fig = px.scatter(
+            #         df,
+            #         x=target_var,
+            #         y=num_var,
+            #         color=target_var,
+            #         labels={target_var: target_var, num_var: num_var},
+            #         title=f"{num_var} vs. {target_var}",
+            #         hover_data=df.columns,
+            #     )
+            #     fig.update_layout(
+            #         xaxis_title=target_var,
+            #         yaxis_title=num_var,
+            #         legend_title=target_var,
+            #     )
+            #     st.plotly_chart(fig, use_container_width=True)
 
             # # Free Text Analysis with Word Cloud
             # if free_text_vars:

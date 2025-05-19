@@ -15,7 +15,7 @@ from utils import *
 # st.set_page_config(layout="wide")
 
 # App title
-st.title("Analyse statistique 1er semestre")
+st.title("Analyse statistique 2ème semestre")
 
 # File upload
 uploaded_file = st.file_uploader("Upload an Excel or CSV file", type=["csv", "xlsx"])

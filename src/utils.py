@@ -1,6 +1,6 @@
 from sklearn.feature_extraction.text import CountVectorizer
-# from wordcloud import WordCloud
-# from nltk.corpus import stopwords
+from wordcloud import WordCloud
+from nltk.corpus import stopwords
 
 # nltk.download('stopwords')  # run only once
 # stop_words = set(stopwords.words('french'))  # Add multiple languages if needed
@@ -38,6 +38,43 @@ def clean_classe_column(df):
     df['College'] = 'college'
 
     return df
+
+
+def add_concatenated_column(df, col1, col2, new_col_name, separator=" "):
+    """
+    Adds a new column to the DataFrame by concatenating two existing columns with a separator,
+    and inserts it right after the second column.
+
+    Parameters:
+    - df: pandas.DataFrame
+    - col1: str, name of the first column
+    - col2: str, name of the second column
+    - new_col_name: str, name of the new column to create
+    - separator: str, optional separator between values (default is a space)
+
+    Returns:
+    - pandas.DataFrame with the new column inserted
+    """
+    new_col = df[col1].astype(str) + separator + df[col2].astype(str)
+
+    # Get index of col2
+    insert_at = df.columns.get_loc(col2) + 1
+
+    # Insert new column
+    df.insert(insert_at, new_col_name, new_col)
+
+    return df
+
+
+def get_next_column(df, current_col):
+    """Return the next column after current_col if it exists, else None."""
+    try:
+        idx = df.columns.get_loc(current_col)
+        if idx + 1 < len(df.columns):
+            return df.columns[idx + 1]
+    except KeyError:
+        pass
+    return None
 
 
 # Helper function to detect free text columns

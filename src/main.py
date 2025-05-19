@@ -42,6 +42,8 @@ if uploaded_file:
     # Homogenize classes
     # parent_columns = [col for col in df.columns if col.startswith('En tant que parent,')]
     # df = clean_parent_columns(df, parent_columns)
+    
+    df = df_raw
 
 
     '''Streamlit App'''

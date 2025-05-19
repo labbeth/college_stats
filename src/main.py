@@ -28,7 +28,7 @@ if uploaded_file:
         df_raw = pd.read_excel(uploaded_file)
 
     # Apply the functions to the dataframe
-    df = clean_classe_column(df_raw)
+    # df = clean_classe_column(df_raw)
 
     # Reorder the columns to place 'Niveau' and 'College' after 'Classe de votre enfant'
     cols = list(df.columns)
@@ -40,8 +40,8 @@ if uploaded_file:
     df = df_raw[cols]
 
     # Homogenize classes
-    parent_columns = [col for col in df.columns if col.startswith('En tant que parent,')]
-    df = clean_parent_columns(df, parent_columns)
+    # parent_columns = [col for col in df.columns if col.startswith('En tant que parent,')]
+    # df = clean_parent_columns(df, parent_columns)
 
 
     '''Streamlit App'''

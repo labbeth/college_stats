@@ -109,13 +109,26 @@ if uploaded_file:
             custom_colors = {
                 "Absolument pas": "#d73027",  # Red tone for negative class
                 "Plutôt non": "#fc8d59",  # Lighter red
+                "Non, assez peu": "#fc8d59",
+                "Assez mal": "#fc8d59",
+                "Oui, un peu": "#fc8d59",
                 "Non": "#d73027",  # Lighter red (similar tone for general "Non")
                 "Non pas du tout": "#d73027",
+                "Non, pas du tout": "#d73027",
+                "Très mal": "#d73027",
+                "Oui, souvent": "#d73027",
+                "Négativement": "#d73027",
                 "Peu satisfaisante": "#d73027",
                 "Plutôt difficile": "#d73027",
                 "Oui, plutôt": "#91bfdb",  # Light blue
                 "Plutôt oui": "#91bfdb",
+                "Assez bien": "#91bfdb",
+                "Oui, partiellement": "#91bfdb",
+                "Oui, un peu": "#91bfdb",
+                "Non, pas vraiment": "#91bfdb",
                 "Oui": "#4575b4",  # Light blue (similar tone for general "Oui")
+                "Oui, beaucoup": "#4575b4",
+                "Positivement": "#4575b4",
                 "Oui tout à fait": "#4575b4",
                 "Assez satisfaisante": "#91bfdb",
                 "Plutôt bien": "#91bfdb",

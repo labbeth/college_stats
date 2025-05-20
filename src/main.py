@@ -108,6 +108,17 @@ if uploaded_file:
             help="Select the target variable to group the data."
         )
 
+    # Étape optionnelle : filtrer une valeur spécifique du groupe cible
+    if target_var:
+        st.write(f"### Filtrer les données sur une valeur de '{target_var}'")
+        filter_value = st.selectbox(
+            f"Choisissez une valeur de {target_var} à analyser (ou laissez vide pour tout analyser)",
+            options=["-- Toutes les valeurs --"] + sorted(df[target_var].dropna().unique().tolist())
+        )
+
+        if filter_value != "-- Toutes les valeurs --":
+            df = df[df[target_var] == filter_value]
+
     # Step 4: Button to trigger statistics computation
     if st.button("Lancer l'analyse"):
         if target_variables and analysis_columns:

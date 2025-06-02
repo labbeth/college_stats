@@ -1,17 +1,12 @@
 import streamlit as st
 import pandas as pd
 import re
-import io
-import base64
-import urllib.parse
 # from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import plotly.express as px
 from nltk.corpus import stopwords
 import nltk
-import streamlit.components.v1 as components
 from utils import *
-
 
 # Download stop words if not already available
 # nltk.download('stopwords')  # run only once
@@ -22,21 +17,6 @@ from utils import *
 
 # App title
 st.title("Analyse statistique 2ème semestre")
-
-# Lecture d’un résumé depuis l’URL
-params = st.query_params
-if "summary" in st.query_params:
-    try:
-        decoded = base64.urlsafe_b64decode(st.query_params["summary"]).decode()
-        df = pd.read_csv(io.StringIO(decoded))
-        st.success("Résumé chargé depuis l’URL")
-        st.write("### Résumé partagé")
-        st.dataframe(df, use_container_width=True)
-        st.stop()
-    except Exception as e:
-        st.error(f"Erreur de décodage du résumé : {e}")
-
-
 
 # File upload
 uploaded_file = st.file_uploader("Upload an Excel or CSV file", type=["csv", "xlsx"])
@@ -70,19 +50,8 @@ if uploaded_file:
 
     '''Streamlit App'''
 
-    # Inject CSS to allow multi-line cell text
-    st.markdown("""
-            <style>
-            .stDataFrame div[data-testid="stDataFrameCell"] {
-                white-space: normal !important;
-                word-wrap: break-word !important;
-                overflow-wrap: break-word !important;
-            }
-            </style>
-        """, unsafe_allow_html=True)
-
     st.write("### Data Preview")
-    st.dataframe(df.head(), use_container_width=True)
+    st.dataframe(df.head())
 
     # Detect variable types
     numerical_vars = df.select_dtypes(include=['number']).columns.tolist()
@@ -156,27 +125,7 @@ if uploaded_file:
             # Overall Statistics
             st.write("### Statistiques globales")
             overall_stats = df[analysis_columns].describe(include='all').transpose()
-            # Affichage sans troncage
-            st.markdown("""
-                <style>
-                .stDataFrame div[data-testid="stDataFrameCell"] {
-                    white-space: normal !important;
-                    word-wrap: break-word !important;
-                    overflow-wrap: break-word !important;
-                }
-                </style>
-            """, unsafe_allow_html=True)
-            st.dataframe(overall_stats, use_container_width=True)
-
-            # Encodage du résumé
-            encoded_summary = base64.urlsafe_b64encode(overall_stats.to_csv().encode()).decode()
-
-            # URL de base manuelle ou fixée
-            base_url = "https://your-app.streamlit.app"  # Remplace par ton URL réelle si déployée
-            share_url = f"{base_url}?summary={encoded_summary}"
-
-            st.markdown("#### 🔗 Partager ce résumé d'analyse")
-            st.code(share_url)
+            st.dataframe(overall_stats)
 
             # Grouped Statistics
             st.write(f"### Statistiques groupées")

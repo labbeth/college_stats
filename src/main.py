@@ -125,23 +125,34 @@ def ordered_group_values(series: pd.Series):
 
 def get_color_map(question_label: str, present_classes: list[str]) -> dict[str, str]:
     colors = BASE_COLORS.copy()
+    q = str(question_label).strip().lower()
 
-    if question_label in INVERT_RED_BLUE_FOR:
-        swap_map = {
-            "Non": "Oui",
-            "Oui": "Non",
-            "Absolument pas": "Oui, tout à fait",
-            "Oui, tout à fait": "Absolument pas",
-            "Plutôt non": "Oui, plutôt",
-            "Oui, plutôt": "Plutôt non",
-            "Non, pas du tout": "Oui, tout à fait",
-            "Non, pas vraiment": "Oui, plutôt",
-        }
-        for left, right in swap_map.items():
+    invert_needed = (
+        q.startswith("vous a-t-il manqué des éléments")
+        or "emploi du temps" in q
+    )
+
+    if invert_needed:
+        swap_pairs = [
+            ("Non", "Oui"),
+            ("Absolument pas", "Oui, tout à fait"),
+            ("Plutôt non", "Oui, plutôt"),
+            ("Non, pas du tout", "Oui, tout à fait"),
+            ("Non, pas vraiment", "Oui, plutôt"),
+        ]
+        for left, right in swap_pairs:
             if left in colors and right in colors:
                 colors[left], colors[right] = colors[right], colors[left]
 
-    return {cls: colors.get(cls, NEUTRAL_COLOR) for cls in present_classes}
+    mapped = {cls: colors[cls] for cls in present_classes if cls in colors}
+    missing = [cls for cls in present_classes if cls not in colors]
+
+    if missing:
+        fallback = px.colors.qualitative.Plotly
+        for i, cls in enumerate(missing):
+            mapped[cls] = fallback[i % len(fallback)]
+
+    return mapped
 
 
 def split_report_columns(df: pd.DataFrame, target_variables, numerical_vars, datetime_vars, ip_vars, email_vars):

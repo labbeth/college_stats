@@ -3,7 +3,7 @@ import re
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-from utils_updated import detect_free_text, format_title
+from utils import detect_free_text, format_title
 
 st.title("Analyse statistique 2ème semestre")
 

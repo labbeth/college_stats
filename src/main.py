@@ -123,7 +123,7 @@ def ordered_group_values(series: pd.Series):
     return sorted(values)
 
 
-def get_color_map(question_label: str, present_classes: list[str]) -> dict[str, str]:
+def get_color_config(question_label: str, present_classes: list[str]) -> dict:
     colors = BASE_COLORS.copy()
 
     if question_label in INVERT_RED_BLUE_FOR:
@@ -141,7 +141,10 @@ def get_color_map(question_label: str, present_classes: list[str]) -> dict[str, 
             if left in colors and right in colors:
                 colors[left], colors[right] = colors[right], colors[left]
 
-    return {cls: colors.get(cls, NEUTRAL_COLOR) for cls in present_classes}
+    if all(cls in colors for cls in present_classes):
+        return {"color_discrete_map": {cls: colors[cls] for cls in present_classes}}
+
+    return {"color_discrete_sequence": px.colors.qualitative.Plotly}
 
 
 def split_report_columns(df: pd.DataFrame, target_variables, numerical_vars, datetime_vars, ip_vars, email_vars):
@@ -291,7 +294,7 @@ if uploaded_file:
                     class_order = [cls for cls in BASE_COLORS if cls in unique_classes] + [
                         cls for cls in unique_classes if cls not in BASE_COLORS
                     ]
-                    dynamic_colors = get_color_map(normalize_display_name(var), class_order)
+                    color_config = get_color_config(normalize_display_name(var), class_order)
 
                     plot_data = percentage_data.stack().reset_index()
                     plot_data.columns = [target_var, var, "Percentage"]
@@ -310,8 +313,8 @@ if uploaded_file:
                         hover_data={"Count": True, "Percentage": True, target_var: False},
                         barmode="stack",
                         labels={"Percentage": "Percentage (%)", "Count": "Count", target_var: target_var},
-                        color_discrete_map=dynamic_colors,
                         category_orders={var: class_order, target_var: ordered_target_values},
+                        **color_config,
                     )
 
                     formatted_title = format_title(normalize_display_name(var), max_chars_per_line=55)

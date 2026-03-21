@@ -9,10 +9,8 @@ st.title("Analyse statistique 2ème semestre")
 
 uploaded_file = st.file_uploader("Upload an Excel or CSV file", type=["csv", "xlsx"])
 
-# Preferred display order for school levels
 NIVEAU_ORDER = ["6ème", "5ème", "4ème", "3ème"]
 
-# Column renaming / display normalization requested from review notes
 DISPLAY_RENAMES = {
     "Comment votre enfant a-t-il trouvé cette journée ?": (
         "Comment votre enfant a-t-il trouvé cette journée d’intégration ?"
@@ -22,27 +20,24 @@ DISPLAY_RENAMES = {
     ),
 }
 
-# Redundant question to exclude from the visual report
 EXCLUDED_COLUMNS = {
     "Comment s’est déroulée la journée d’intégration ?",
 }
 
-# Free-text / comments columns to export separately
 COMMENT_PATTERNS = (
     "commentaire",
     "commentaires",
     "notes d'analyse",
 )
 
-# Questions for which red/blue must be inverted
 INVERT_RED_BLUE_FOR = {
     "Vous a-t-il manqué des éléments permettant une meilleure intégration de votre enfant en 6e ?",
     "Votre enfant a-t-il des problèmes spécifiques liés à son emploi du temps ?",
     "Votre enfant a-t-il des problèmes spécifiques liés à son emploi du temps\u00A0?",
 }
 
-POSITIVE_COLOR = "#4575b4"  # blue
-NEGATIVE_COLOR = "#d73027"  # red
+POSITIVE_COLOR = "#4575b4"
+NEGATIVE_COLOR = "#d73027"
 LIGHT_POSITIVE = "#91bfdb"
 LIGHT_NEGATIVE = "#fc8d59"
 NEUTRAL_COLOR = "#999999"
@@ -89,10 +84,36 @@ def normalize_display_name(col_name: str) -> str:
     return DISPLAY_RENAMES.get(col_name, col_name)
 
 
+def clean_columns(df: pd.DataFrame) -> pd.DataFrame:
+    cols = []
+    seen = {}
+    for col in df.columns:
+        name = "" if pd.isna(col) else str(col)
+        name = re.sub(r"\s+", " ", name).strip()
+        if not name:
+            name = "Colonne_sans_nom"
+        if name in seen:
+            seen[name] += 1
+            name = f"{name}.{seen[name]}"
+        else:
+            seen[name] = 0
+        cols.append(name)
+    df.columns = cols
+    return df
+
+
 def load_data(file_obj):
+    file_obj.seek(0)
     if file_obj.name.endswith(".csv"):
-        return pd.read_csv(file_obj)
-    return pd.read_excel(file_obj)
+        df = pd.read_csv(file_obj, header=1)
+    else:
+        df = pd.read_excel(file_obj, header=1)
+
+    df = clean_columns(df)
+
+    # Remove rows that are entirely empty after taking the second row as header.
+    df = df.dropna(how="all").reset_index(drop=True)
+    return df
 
 
 def ordered_group_values(series: pd.Series):
@@ -150,7 +171,7 @@ def build_comments_workbook(df: pd.DataFrame, target_var: str, columns: list[str
             if comments_df.empty:
                 continue
             sheet_name = re.sub(r"[\\/*?:\[\]]", "_", normalize_display_name(col))[:31]
-            comments_df.rename(columns={col: normalize_display_name(col)}, inplace=True)
+            comments_df = comments_df.rename(columns={col: normalize_display_name(col)})
             comments_df.to_excel(writer, index=False, sheet_name=sheet_name)
     return buffer.getvalue()
 
@@ -228,7 +249,7 @@ if uploaded_file:
                 st.download_button(
                     "Télécharger le fichier des commentaires (.xlsx)",
                     data=comments_xlsx,
-                    file_name="commentaires_sepaires.xlsx",
+                    file_name="commentaires_separes.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 )
 
@@ -245,7 +266,6 @@ if uploaded_file:
             st.write("### Visualisations")
             ordered_target_values = ordered_group_values(df[target_var])
 
-            # Start at the rentrée question when present
             sorted_report_columns = report_columns
             rentree_col = "Comment s’est déroulée la rentrée scolaire ?"
             if rentree_col in report_columns:

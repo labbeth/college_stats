@@ -56,6 +56,7 @@ BASE_COLORS = {
     "Oui, souvent": NEGATIVE_COLOR,
     "Négativement": NEGATIVE_COLOR,
     "Peu satisfaisante": NEGATIVE_COLOR,
+    "Non satisfaisante": NEGATIVE_COLOR,
     "Plutôt difficile": NEGATIVE_COLOR,
     "Oui, plutôt": LIGHT_POSITIVE,
     "Plutôt oui": LIGHT_POSITIVE,

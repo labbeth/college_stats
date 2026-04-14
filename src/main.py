@@ -63,7 +63,7 @@ BASE_COLORS = {
     "Plutôt oui": LIGHT_POSITIVE,
     "Assez bien": LIGHT_POSITIVE,
     "Oui, partiellement": LIGHT_POSITIVE,
-    "Non, pas vraiment": LIGHT_POSITIVE,
+    #"Non, pas vraiment": LIGHT_POSITIVE,
     "Oui": POSITIVE_COLOR,
     "Oui, beaucoup": POSITIVE_COLOR,
     "Positivement": POSITIVE_COLOR,

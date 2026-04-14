@@ -48,6 +48,7 @@ BASE_COLORS = {
     "Non, assez peu": LIGHT_NEGATIVE,
     "Assez mal": LIGHT_NEGATIVE,
     "Non, plutôt pas": LIGHT_NEGATIVE,
+    "Non, pas vraiment": LIGHT_NEGATIVE,
     "Oui, un peu": LIGHT_NEGATIVE,
     "Non": NEGATIVE_COLOR,
     "Non pas du tout": NEGATIVE_COLOR,

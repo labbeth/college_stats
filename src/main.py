@@ -74,6 +74,12 @@ BASE_COLORS = {
     "Très satisfaisante": POSITIVE_COLOR,
     "Très bien": POSITIVE_COLOR,
     "Non concerné": NEUTRAL_COLOR,
+    "Mon enfant est un peu en difficulté pour mener cette recherche mais il a trouvé l'aide nécessaire.": LIGHT_NEGATIVE,
+    "Mon enfant est en difficulté et ne sait pas comment trouver de l'aide.": NEGATIVE_COLOR,
+    "Entre une demi-heure et une heure": LIGHT_POSITIVE,
+    "Moins d'une demi-heure": POSITIVE_COLOR,
+    "Entre une heure et deux heures": LIGHT_NEGATIVE,
+    "Plus de deux heures": NEGATIVE_COLOR,
 }
 
 

@@ -80,6 +80,9 @@ BASE_COLORS = {
     "Moins d'une demi-heure": POSITIVE_COLOR,
     "Entre une heure et deux heures": LIGHT_NEGATIVE,
     "Plus de deux heures": NEGATIVE_COLOR,
+    "Je me sens bien informé et à l’aise avec ces démarches.": POSITIVE_COLOR,
+    "Je sais très peu de choses et je me sens perdu.": NEGATIVE_COLOR,
+    "J’ai des informations, mais j’aimerais en avoir davantage.": LIGHT_NEGATIVE,
 }
 
 

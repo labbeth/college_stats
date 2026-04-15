@@ -41,6 +41,7 @@ NEGATIVE_COLOR = "#d73027"
 LIGHT_POSITIVE = "#91bfdb"
 LIGHT_NEGATIVE = "#fc8d59"
 NEUTRAL_COLOR = "#999999"
+GREEN_COLOR = '#2ca02c'
 
 BASE_COLORS = {
     "Absolument pas": NEGATIVE_COLOR,
@@ -84,6 +85,7 @@ BASE_COLORS = {
     "Je sais très peu de choses et je me sens perdu.": NEGATIVE_COLOR,
     "J’ai des informations, mais j’aimerais en avoir davantage.": LIGHT_NEGATIVE,
     "n'a pas de téléphone portable.": NEUTRAL_COLOR,
+    "a un téléphone mobile classique (appels et SMS seulement).": GREEN_COLOR,
 }
 
 

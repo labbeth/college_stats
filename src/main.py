@@ -367,7 +367,7 @@ if uploaded_file:
                         y="Percentage",
                         color=wrapped_var,
                         text="Count",
-                        hover_data={"Count": True, "Percentage": True, target_var: False},
+                        hover_data={"Count": True, "Percentage": True, target_var: False, wrapped_var: False},
                         barmode="stack",
                         labels={"Percentage": "Percentage (%)", "Count": "Count", target_var: target_var},
                         color_discrete_map=dynamic_colors,

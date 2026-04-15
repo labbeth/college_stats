@@ -86,6 +86,9 @@ BASE_COLORS = {
     "J’ai des informations, mais j’aimerais en avoir davantage.": LIGHT_NEGATIVE,
     "n'a pas de téléphone portable.": NEUTRAL_COLOR,
     "a un téléphone mobile classique (appels et SMS seulement).": GREEN_COLOR,
+    "Il l'apporte très régulièrement au collège, car il en a besoin avant ou après le collège.": POSITIVE_COLOR,
+    "Il l'apporte au collège de temps en temps car il peut en avoir besoin ponctuellement, avant ou après le collège.": LIGHT_POSITIVE,
+    "Le smartphone reste à la maison quand mon enfant est au collège.": GREEN_COLOR,
 }
 
 

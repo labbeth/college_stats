@@ -172,6 +172,26 @@ def get_color_map(question_label: str, present_classes: list[str]) -> dict[str, 
     return mapped
 
 
+def wrap_label(label, max_len=40):
+    words = str(label).split()
+    lines = []
+    current = ""
+
+    for word in words:
+        test = f"{current} {word}".strip()
+        if len(test) <= max_len:
+            current = test
+        else:
+            if current:
+                lines.append(current)
+            current = word
+
+    if current:
+        lines.append(current)
+
+    return "<br>".join(lines)
+    
+
 def split_report_columns(df: pd.DataFrame, target_variables, numerical_vars, datetime_vars, ip_vars, email_vars):
     excluded_vars = set(target_variables + numerical_vars + datetime_vars + ip_vars + email_vars)
     report_columns = []
@@ -324,7 +344,19 @@ if uploaded_file:
                     plot_data = percentage_data.stack().reset_index()
                     plot_data.columns = [target_var, var, "Percentage"]
                     plot_data["Count"] = grouped_data.stack().values
-                    plot_data[var] = pd.Categorical(plot_data[var], categories=class_order, ordered=True)
+                    # plot_data[var] = pd.Categorical(plot_data[var], categories=class_order, ordered=True)
+                    # créer version "wrapped"
+                    wrapped_var = f"{var}_wrapped"
+                    
+                    plot_data[wrapped_var] = plot_data[var].apply(lambda x: wrap_label(x, 40))
+                    
+                    class_order_wrapped = [wrap_label(c, 40) for c in class_order]
+                    
+                    dynamic_colors_wrapped = {
+                        wrap_label(k, 40): v for k, v in dynamic_colors.items()
+                    }
+
+
                     plot_data[target_var] = pd.Categorical(
                         plot_data[target_var], categories=ordered_target_values, ordered=True
                     )
@@ -333,7 +365,7 @@ if uploaded_file:
                         plot_data,
                         x=target_var,
                         y="Percentage",
-                        color=var,
+                        color=wrapped_var,
                         text="Count",
                         hover_data={"Count": True, "Percentage": True, target_var: False},
                         barmode="stack",

@@ -7,6 +7,27 @@ from utils import detect_free_text, format_title
 
 st.title("Analyse statistique 2ème semestre")
 
+st.markdown("""
+<style>
+/* Empêche la coupure des graphiques */
+.plot-container {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+}
+
+/* Streamlit plot wrapper */
+div[data-testid="stPlotlyChart"] {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+}
+
+/* Général : éviter les coupures dans les blocs */
+.block-container {
+    page-break-inside: avoid;
+}
+</style>
+""", unsafe_allow_html=True)
+
 uploaded_file = st.file_uploader("Upload an Excel or CSV file", type=["csv", "xlsx"])
 
 NIVEAU_ORDER = ["6ème", "5ème", "4ème", "3ème"]

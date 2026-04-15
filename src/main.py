@@ -345,18 +345,34 @@ if uploaded_file:
                     plot_data.columns = [target_var, var, "Percentage"]
                     plot_data["Count"] = grouped_data.stack().values
                     # plot_data[var] = pd.Categorical(plot_data[var], categories=class_order, ordered=True)
-                    # créer version "wrapped"
+                    #plot_data[target_var] = pd.Categorical(
+                    #    plot_data[target_var], categories=ordered_target_values, ordered=True
+                    #)
+
                     wrapped_var = f"{var}_wrapped"
+
+                    # dictionnaire original -> label wrappé
+                    wrapped_labels_map = {cls: wrap_label(cls, 40) for cls in class_order}
                     
-                    plot_data[wrapped_var] = plot_data[var].apply(lambda x: wrap_label(x, 40))
+                    # nouvelle colonne utilisée uniquement pour l'affichage de la légende
+                    plot_data[wrapped_var] = plot_data[var].map(wrapped_labels_map)
                     
-                    class_order_wrapped = [wrap_label(c, 40) for c in class_order]
+                    # ordre des catégories wrappées
+                    class_order_wrapped = [wrapped_labels_map[cls] for cls in class_order]
                     
+                    # très important : conserver exactement les couleurs d'origine
                     dynamic_colors_wrapped = {
-                        wrap_label(k, 40): v for k, v in dynamic_colors.items()
+                        wrapped_labels_map[cls]: dynamic_colors[cls]
+                        for cls in class_order
+                        if cls in dynamic_colors
                     }
-
-
+                    
+                    plot_data[wrapped_var] = pd.Categorical(
+                        plot_data[wrapped_var],
+                        categories=class_order_wrapped,
+                        ordered=True
+                    )
+                    
                     plot_data[target_var] = pd.Categorical(
                         plot_data[target_var], categories=ordered_target_values, ordered=True
                     )
@@ -370,8 +386,10 @@ if uploaded_file:
                         hover_data={"Count": True, "Percentage": True, target_var: False, wrapped_var: False},
                         barmode="stack",
                         labels={"Percentage": "Percentage (%)", "Count": "Count", target_var: target_var},
-                        color_discrete_map=dynamic_colors,
-                        category_orders={var: class_order, target_var: ordered_target_values},
+                        #color_discrete_map=dynamic_colors,
+                        #category_orders={var: class_order, target_var: ordered_target_values},
+                        color_discrete_map=dynamic_colors_wrapped,
+                        category_orders={wrapped_var: class_order_wrapped, target_var: ordered_target_values},
                     )
 
                     formatted_title = format_title(normalize_display_name(var), max_chars_per_line=55)
